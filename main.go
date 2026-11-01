@@ -4,14 +4,14 @@ import (
 	"context"
 	"cooldocs/internal/database"
 	"cooldocs/internal/httpapi"
-	"cooldocs/internal/projects"
-	"encoding/json"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
+	"cooldocs/internal/routes"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 )
 
 type Response struct {
@@ -19,16 +19,8 @@ type Response struct {
 	Status  string `json:"status"`
 }
 
-// Checking the health of the server
-func healthHandle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	response := Response{
-		Message: "CoolDocs API is running",
-		Status:  "Ok",
-	}
-	json.NewEncoder(w).Encode(response)
-
+type CreateProjectRequest struct {
+	Name string `json:"name"`
 }
 
 func main() {
@@ -43,12 +35,12 @@ func main() {
 	}
 
 	// To enable concurrency
-	ctx, cancel := context.WithTimeout(
+	dbCtx, cancel := context.WithTimeout(
 		context.Background(),
 		5*time.Second,
 	)
 
-	db, err := database.Open(ctx, databaseUrl)
+	db, err := database.Open(dbCtx, databaseUrl)
 
 	cancel()
 
@@ -57,36 +49,23 @@ func main() {
 		log.Fatal("Error while connecting to the DB")
 	}
 
-	// projects
-	projectRepository := projects.NewRepository(db)
-	projectService := projects.NewService(projectRepository)
+	// routes
+	projectRoute := routes.NewProjectRoute(db)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", healthHandle)
+	mux.HandleFunc("GET /health", routes.Health)
 
 	// Document read Handler
-	mux.HandleFunc("GET /v1/projects/{projectId}/{documentPath...}",
-		func(w http.ResponseWriter, r *http.Request) {
-			proj, err := projectService.GetProject(r.Context(), r.PathValue("projectId"))
-
-			if err != nil {
-				log.Fatal("Error while taking the project")
-			}
-
-			log.Printf("%s", proj.Name)
-
-			response := Response{
-				Message: "Done!",
-				Status:  "200",
-			}
-
-			json.NewEncoder(w).Encode(response)
-		})
+	// mux.HandleFunc("GET /v1/projects/{projectId}/{documentPath...}")
 
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: httpapi.CORS(mux),
 	}
+
+	mux.HandleFunc("GET /v1/projects/{projectId}", projectRoute.Get)
+
+	mux.HandleFunc("POST /v1/projects", projectRoute.Post)
 
 	log.Println("CoolDocs server is listening on 8080")
 
