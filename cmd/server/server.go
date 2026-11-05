@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"context"
@@ -57,15 +57,16 @@ func main() {
 
 	// Document read Handler
 	// mux.HandleFunc("GET /v1/projects/{projectId}/{documentPath...}")
+	// Handling taking project data
+	mux.HandleFunc("GET /v1/projects/{projectId}", projectRoute.Get)
+
+	// Adding projects
+	mux.HandleFunc("POST /v1/projects", projectRoute.Post)
 
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: httpapi.CORS(mux),
 	}
-
-	mux.HandleFunc("GET /v1/projects/{projectId}", projectRoute.Get)
-
-	mux.HandleFunc("POST /v1/projects", projectRoute.Post)
 
 	log.Println("CoolDocs server is listening on 8080")
 
