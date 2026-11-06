@@ -51,6 +51,7 @@ func main() {
 
 	// routes
 	projectRoute := routes.NewProjectRoute(db)
+	databasesRoute := routes.NewDatabasesRoute(db)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", routes.Health)
@@ -62,6 +63,10 @@ func main() {
 
 	// Adding projects
 	mux.HandleFunc("POST /v1/projects", projectRoute.Post)
+
+	// Adding databases
+	mux.HandleFunc("GET /v1/databases/{projectId}/databases/{databaseId}", databasesRoute.Get)
+	mux.HandleFunc("POST /v1/projects/{projectId}/databases", databasesRoute.Post)
 
 	server := &http.Server{
 		Addr:    ":8080",
