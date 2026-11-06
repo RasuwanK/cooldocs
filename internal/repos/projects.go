@@ -25,7 +25,7 @@ func NewProjectRepository(db *sql.DB) *ProjectRepository {
 }
 
 // Fetch the name of a single project
-func (repo *ProjectRepository) Get(ctx context.Context, projectId string) (Project, error) {
+func (repo *ProjectRepository) Get(ctx context.Context, projectId string) (*Project, error) {
 	var name string
 
 	err := repo.db.QueryRowContext(
@@ -36,7 +36,7 @@ func (repo *ProjectRepository) Get(ctx context.Context, projectId string) (Proje
 
 	if err != nil {
 		log.Printf("Error while executing query to select the project (Error: %v)", err)
-		return Project{}, nil
+		return nil, err
 	}
 
 	project := Project{
@@ -44,10 +44,10 @@ func (repo *ProjectRepository) Get(ctx context.Context, projectId string) (Proje
 		Name: name,
 	}
 
-	return project, nil
+	return &project, nil
 }
 
-func (repo *ProjectRepository) Create(ctx context.Context, name string) (Project, error) {
+func (repo *ProjectRepository) Create(ctx context.Context, name string) (*Project, error) {
 	var project Project
 
 	err := repo.db.QueryRowContext(
@@ -58,8 +58,8 @@ func (repo *ProjectRepository) Create(ctx context.Context, name string) (Project
 
 	if err != nil {
 		log.Printf("Error while executing query to insert a project (Error: %v)", err)
-		return Project{}, err
+		return nil, err
 	}
 
-	return project, nil
+	return &project, nil
 }

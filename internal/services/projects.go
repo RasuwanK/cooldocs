@@ -18,18 +18,18 @@ func NewProjectService(db *sql.DB) *ProjectService {
 }
 
 // Handling the document read
-func (sr *ProjectService) GetProject(ctx context.Context, projectId string) (repos.Project, error) {
+func (sr *ProjectService) GetProject(ctx context.Context, projectId string) (*repos.Project, error) {
 	project, err := sr.repo.Get(ctx, projectId)
 
 	if err != nil {
 		log.Printf("Error occured while getting project, (Error: %v)", err)
-		return project, err
+		return nil, err
 	}
 
 	return project, nil
 }
 
-func (sr *ProjectService) CreateProject(ctx context.Context, projectName string) (repos.Project, error) {
+func (sr *ProjectService) CreateProject(ctx context.Context, projectName string) (*repos.Project, error) {
 	project, err := sr.repo.Create(
 		ctx,
 		projectName,
@@ -37,7 +37,7 @@ func (sr *ProjectService) CreateProject(ctx context.Context, projectName string)
 
 	if err != nil {
 		log.Printf("Error occured while creating the project, (Error: %v)", err)
-		return project, err
+		return nil, err
 	}
 
 	return project, nil

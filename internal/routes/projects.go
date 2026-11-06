@@ -51,12 +51,8 @@ func (route *ProjectRoute) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	if err != nil {
-		log.Fatal("Error while fetching the project")
-	}
-
 	project := ProjectResponse{
-		Project: proj,
+		Project: *proj,
 	}
 
 	json.NewEncoder(w).Encode(project)
@@ -90,7 +86,7 @@ func (route *ProjectRoute) Post(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Project created (id: %s,name: %s)", proj.Id, proj.Name)
 
 	response := ProjectResponse{
-		Project: proj,
+		Project: *proj,
 	}
 
 	json.NewEncoder(w).Encode(response)
