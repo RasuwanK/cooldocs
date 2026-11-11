@@ -68,6 +68,9 @@ func main() {
 	mux.HandleFunc("GET /v1/databases/{projectId}/databases/{databaseId}", databasesRoute.Get)
 	mux.HandleFunc("POST /v1/projects/{projectId}/databases", databasesRoute.Post)
 
+	// Handling document reads
+	mux.HandleFunc("GET /v1/projects/{projectId}/databases/{databaseId}/collections/{documentPath}")
+
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: httpapi.CORS(mux),
